@@ -2,6 +2,7 @@ package Mojolicious::Plugin::Log::Any;
 
 use Mojo::Base 'Mojolicious::Plugin';
 use Carp 'croak';
+use Module::Runtime 'require_module';
 use Scalar::Util 'blessed';
 
 our $VERSION = '0.001';
@@ -44,9 +45,9 @@ sub register {
       my ($log, $level, @msg) = @_;
       $logger->$level("[$level] " . join "\n", @msg);
     };
-  } elsif ($logger eq 'Log::Contextual') {
-    require Log::Contextual;
-    Log::Contextual->import(':log');
+  } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
+    require_module "$logger";
+    "$logger"->import(':log');
     $do_log = sub {
       my ($log, $level, @msg) = @_;
       $self->can("slog_$level")->(join "\n", @msg);
@@ -62,7 +63,7 @@ sub register {
 
 =head1 NAME
 
-Mojolicious::Plugin::Log::Any - Mojolicious plugin to log to any logging framework
+Mojolicious::Plugin::Log::Any - Use other loggers for Mojolicious applications
 
 =head1 SYNOPSIS
 
@@ -75,6 +76,11 @@ Mojolicious::Plugin::Log::Any - Mojolicious plugin to log to any logging framewo
     # Log::Any (default)
     use Log::Any::Adapter {category => 'MyApp'}, 'Syslog';
     $self->plugin('Log::Any');
+    
+    # Log::Contextual
+    use Log::Contextual::WarnLogger;
+    use Log::Contextual -logger => Log::Contextual::WarnLogger->new({env_prefix => 'MYAPP'});
+    $self->plugin('Log::Any' => {logger => 'Log::Contextual});
     
     # Log::Dispatch
     use Log::Dispatch;
@@ -126,8 +132,11 @@ in the standard manner, using the object's existing category.
 
 =item Log::Contextual
 
-The string C<Log::Contextual> will use the global L<Log::Contextual> logger.
-Package loggers are not supported.
+The string C<Log::Contextual> (or the package name of a subclass of
+L<Log::Contextual>) will use the global L<Log::Contextual> logger. Package
+loggers are not supported. Note that L<Log::Contextual/"with_logger"> may be
+difficult to use with L<Mojolicious> logging due to the asynchronous nature of
+the dispatch cycle.
 
 =item Log::Dispatch
 
@@ -160,4 +169,5 @@ This is free software, licensed under:
 
 =head1 SEE ALSO
 
-L<Mojo::Log>, L<Log::Any>, L<Log::Dispatch>, L<Log::Dispatchouli>
+L<Mojo::Log>, L<Log::Any>, L<Log::Contextual>, L<Log::Dispatch>,
+L<Log::Dispatchouli>

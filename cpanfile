@@ -1,6 +1,7 @@
 requires 'perl' => '5.010001';
 requires 'Mojolicious' => '6.0';
 requires 'Carp';
+requires 'Module::Runtime';
 requires 'Scalar::Util';
 recommends 'Log::Any';
 test_requires 'Test::More' => '0.88';
