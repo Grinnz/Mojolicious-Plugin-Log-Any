@@ -1,0 +1,11 @@
+requires 'perl' => '5.010001';
+requires 'Mojolicious' => '6.0';
+requires 'Carp';
+requires 'Scalar::Util';
+recommends 'Log::Any';
+test_requires 'Test::More' => '0.88';
+test_requires 'Test::Needs';
+author_requires 'Log::Any';
+author_requires 'Log::Contextual';
+author_requires 'Log::Dispatch';
+author_requires 'Log::Dispatchouli';

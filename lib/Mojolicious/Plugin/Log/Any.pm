@@ -1,19 +1,146 @@
 package Mojolicious::Plugin::Log::Any;
 
-use strict;
-use warnings;
+use Mojo::Base 'Mojolicious::Plugin';
+use Carp 'croak';
+use Scalar::Util 'blessed';
 
 our $VERSION = '0.001';
+
+sub register {
+  my ($self, $app, $conf) = @_;
+  
+  my $logger = $conf->{logger} // 'Log::Any';
+  
+  my $do_log;
+  if (blessed $logger) {
+    if ($logger->isa('Log::Any::Proxy')) {
+      $do_log = sub {
+        my ($log, $level, @msg) = @_;
+        $logger->$level("[$level] " . join "\n", @msg);
+      };
+    } elsif ($logger->isa('Log::Dispatch')) {
+      $do_log = sub {
+        my ($log, $level, @msg) = @_;
+        $level = 'critical' if $level eq 'fatal';
+        $logger->log(level => $level, message => "[$level] " . join "\n", @msg);
+      };
+    } elsif ($logger->isa('Log::Dispatchouli')) {
+      $do_log = sub {
+        my ($log, $level, @msg) = @_;
+        my $message = "[$level] " . join "\n", @msg;
+        return $logger->log_debug($message) if $level eq 'debug';
+        # hacky but we don't want to use log_fatal because it throws an
+        # exception, and we can't localize a call to set_muted
+        local $logger->{muted} = 0 if $level eq 'fatal' and $logger->get_muted;
+        $logger->log($message);
+      };
+    } else {
+      croak "Unsupported logger object class " . ref($logger);
+    }
+  } elsif ($logger eq 'Log::Any') {
+    require Log::Any;
+    $logger = Log::Any->get_logger(category => ref($app));
+    $do_log = sub {
+      my ($log, $level, @msg) = @_;
+      $logger->$level("[$level] " . join "\n", @msg);
+    };
+  } elsif ($logger eq 'Log::Contextual') {
+    require Log::Contextual;
+    Log::Contextual->import(':log');
+    $do_log = sub {
+      my ($log, $level, @msg) = @_;
+      $self->can("slog_$level")->(join "\n", @msg);
+    };
+  } else {
+    croak "Unsupported logger class $logger";
+  }
+  
+  $app->log->unsubscribe('message')->on(message => $do_log);
+}
 
 1;
 
 =head1 NAME
 
-Mojolicious::Plugin::Log::Any - Module abstract
+Mojolicious::Plugin::Log::Any - Mojolicious plugin to log to any logging framework
 
 =head1 SYNOPSIS
 
+  package MyApp;
+  use Mojo::Base 'Mojolicious';
+  
+  sub startup {
+    my $self = shift;
+    
+    # Log::Any (default)
+    use Log::Any::Adapter {category => 'MyApp'}, 'Syslog';
+    $self->plugin('Log::Any');
+    
+    # Log::Dispatch
+    use Log::Dispatch;
+    my $log = Log::Dispatch->new(outputs => ['Screen', min_level => 'warning']);
+    $self->plugin('Log::Any' => {logger => $log});
+    
+    # Log::Dispatchouli
+    use Log::Dispatchouli;
+    my $log = Log::Dispatchouli->new({ident => 'MyApp', facility => 'daemon'});
+    $self->plugin('Log::Any' => {logger => $log});
+  }
+  
+  # or in a Mojolicious::Lite app
+  use Mojolicious::Lite;
+  use Log::Any::Adapter {category => 'Mojolicious::Lite'}, File => '/path/to/file.log', log_level => 'info';
+  plugin 'Log::Any';
+
 =head1 DESCRIPTION
+
+L<Mojolicious::Plugin::Log::Any> is a L<Mojolicious> plugin that redirects the
+application logger to pass its log messages to an external logging framework.
+By default, L<Log::Any> is used, but a different framework or object may be
+specified. The default behavior of the L<Mojo::Log> object to filter messages
+by level, keep history, and write log messages to a file or STDERR will be
+suppressed, as it is expected that the user will configure the selected logging
+framework to handle such details.
+
+=head1 OPTIONS
+
+=head2 logger
+
+  plugin 'Log::Any', {logger => $logger};
+
+Logging framework or object to pass log messages to. The following types are
+recognized:
+
+=over
+
+=item Log::Any
+
+Default. The string C<Log::Any> will use a global L<Log::Any> logger, with the
+L<Mojolicious> application class name as the category (which is
+C<Mojolicious::Lite> for lite applications).
+
+=item Log::Any::Proxy
+
+A L<Log::Any::Proxy> object can be passed directly and will be used for logging
+in the standard manner, using the object's existing category.
+
+=item Log::Contextual
+
+The string C<Log::Contextual> will use the global L<Log::Contextual> logger.
+Package loggers are not supported.
+
+=item Log::Dispatch
+
+A L<Log::Dispatch> object can be passed to be used for logging. The C<fatal>
+log level will be mapped to C<critical>.
+
+=item Log::Dispatchouli
+
+A L<Log::Dispatchouli> object can be passed to be used for logging. The
+C<fatal> log level will log messages even if the object is C<muted>, but an
+exception will not be thrown as L<Log::Dispatchouli/"log_fatal"> normally does.
+
+=back
 
 =head1 BUGS
 
@@ -33,3 +160,4 @@ This is free software, licensed under:
 
 =head1 SEE ALSO
 
+L<Mojo::Log>, L<Log::Any>, L<Log::Dispatch>, L<Log::Dispatchouli>
