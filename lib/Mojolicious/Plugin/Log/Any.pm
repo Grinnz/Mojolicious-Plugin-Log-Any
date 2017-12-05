@@ -38,6 +38,11 @@ sub register {
         local $logger->{muted} = 0 if $level eq 'fatal' and $logger->get_muted;
         $logger->log($formatted);
       };
+    } elsif ($logger->isa('Mojo::Log')) {
+      $do_log = sub {
+        my ($log, $level, @msg) = @_;
+        $logger->$level(@msg);
+      };
     } else {
       croak "Unsupported logger object class " . ref($logger);
     }
@@ -161,6 +166,10 @@ log level will be mapped to C<critical>.
 A L<Log::Dispatchouli> object can be passed to be used for logging. The
 C<fatal> log level will log messages even if the object is C<muted>, but an
 exception will not be thrown as L<Log::Dispatchouli/"log_fatal"> normally does.
+
+=item Mojo::Log
+
+Another L<Mojo::Log> object can be passed to be used for logging.
 
 =back
 

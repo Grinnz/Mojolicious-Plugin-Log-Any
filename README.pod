@@ -96,6 +96,10 @@ A L<Log::Dispatchouli> object can be passed to be used for logging. The
 C<fatal> log level will log messages even if the object is C<muted>, but an
 exception will not be thrown as L<Log::Dispatchouli/"log_fatal"> normally does.
 
+=item Mojo::Log
+
+Another L<Mojo::Log> object can be passed to be used for logging.
+
 =back
 
 =head1 BUGS
