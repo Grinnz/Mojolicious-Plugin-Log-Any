@@ -21,20 +21,20 @@ sub attach_logger {
   if (Scalar::Util::blessed($logger)) {
     if ($logger->isa('Log::Any::Proxy')) {
       $do_log = sub {
-        my (undef, $level, @msg) = @_;
+        my ($self, $level, @msg) = @_;
         my $formatted = "[$level] " . join "\n", @msg;
         $logger->$level($formatted);
       };
     } elsif ($logger->isa('Log::Dispatch')) {
       $do_log = sub {
-        my (undef, $level, @msg) = @_;
+        my ($self, $level, @msg) = @_;
         my $formatted = "[$level] " . join "\n", @msg;
         $level = 'critical' if $level eq 'fatal';
         $logger->log(level => $level, message => $formatted);
       };
     } elsif ($logger->isa('Log::Dispatchouli') or $logger->isa('Log::Dispatchouli::Proxy')) {
       $do_log = sub {
-        my (undef, $level, @msg) = @_;
+        my ($self, $level, @msg) = @_;
         my $formatted = "[$level] " . join "\n", @msg;
         return $logger->log_debug($formatted) if $level eq 'debug';
         # hacky but we don't want to use log_fatal because it throws an
@@ -45,7 +45,7 @@ sub attach_logger {
       };
     } elsif ($logger->isa('Mojo::Log')) {
       $do_log = sub {
-        my (undef, $level, @msg) = @_;
+        my ($self, $level, @msg) = @_;
         $logger->$level(@msg);
       };
     } else {
@@ -55,7 +55,7 @@ sub attach_logger {
     require Log::Any;
     $logger = Log::Any->get_logger(category => $category);
     $do_log = sub {
-      my (undef, $level, @msg) = @_;
+      my ($self, $level, @msg) = @_;
       my $formatted = "[$level] " . join "\n", @msg;
       $logger->$level($formatted);
     };
@@ -63,16 +63,15 @@ sub attach_logger {
     require Log::Log4perl;
     $logger = Log::Log4perl->get_logger($category);
     $do_log = sub {
-      my (undef, $level, @msg) = @_;
+      my ($self, $level, @msg) = @_;
       my $formatted = "[$level] " . join "\n", @msg;
       $logger->$level($formatted);
     };
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     Module::Runtime::require_module("$logger");
     "$logger"->import::into(ref($self), ':log');
-    Scalar::Util::weaken($self);
     $do_log = sub {
-      my (undef, $level, @msg) = @_;
+      my ($self, $level, @msg) = @_;
       my $formatted = "[$level] " . join "\n", @msg;
       $self->can("slog_$level")->($formatted);
     };
