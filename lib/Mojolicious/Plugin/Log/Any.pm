@@ -90,7 +90,7 @@ Mojolicious::Plugin::Log::Any - Use other loggers for Mojolicious applications
       filename  => '/path/to/file.log',
       mode      => 'append',
       newline   => 1,
-      callbacks => sub { my %p = @_; sprintf '[%s] %s', scalar(localtime), $p{message} },
+      callbacks => sub { my %p = @_; '[' . localtime() . '] ' . $p{message} },
     ]);
     $self->plugin('Log::Any' => {logger => $log});
     
