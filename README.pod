@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Mojolicious::Plugin::Log::Any - Use other loggers for Mojolicious applications
+Mojolicious::Plugin::Log::Any - Use other loggers in a Mojolicious application
 
 =head1 SYNOPSIS
 
@@ -51,9 +51,11 @@ Mojolicious::Plugin::Log::Any - Use other loggers for Mojolicious applications
 =head1 DESCRIPTION
 
 L<Mojolicious::Plugin::Log::Any> is a L<Mojolicious> plugin that redirects the
-application logger to pass its log messages to an external logging framework.
-By default, L<Log::Any> is used, but a different framework or object may be
-specified.
+application logger to pass its log messages to an external logging framework
+using L<Mojo::Log::Role::AttachLogger/"attach_logger">. By default, L<Log::Any>
+is used, but a different framework or object may be specified. The category
+for L<Log::Any> or L<Log::Log4perl> is set to the application class name, which
+is C<Mojolicious::Lite> for lite applications.
 
 The default behavior of the L<Mojo::Log> object to filter messages by level,
 keep history, prepend a timestamp, and write log messages to a file or STDERR
@@ -67,51 +69,8 @@ however, will be prepended to the message in brackets before passing it on.
 
   plugin 'Log::Any', {logger => $logger};
 
-Logging framework or object to pass log messages to. The following types are
-recognized:
-
-=over
-
-=item Log::Any
-
-Default. The string C<Log::Any> will use a global L<Log::Any> logger, with the
-L<Mojolicious> application class name as the category (which is
-C<Mojolicious::Lite> for lite applications).
-
-=item Log::Any::Proxy
-
-A L<Log::Any::Proxy> object can be passed directly and will be used for logging
-in the standard manner, using the object's existing category.
-
-=item Log::Contextual
-
-The string C<Log::Contextual> will use the global L<Log::Contextual> logger.
-Package loggers are not supported. Note that L<Log::Contextual/"with_logger">
-may be difficult to use with L<Mojolicious> logging due to the asynchronous
-nature of the dispatch cycle.
-
-=item Log::Dispatch
-
-A L<Log::Dispatch> object can be passed to be used for logging. The C<fatal>
-log level will be mapped to C<critical>.
-
-=item Log::Dispatchouli
-
-A L<Log::Dispatchouli> object can be passed to be used for logging. The
-C<fatal> log level will log messages even if the object is C<muted>, but an
-exception will not be thrown as L<Log::Dispatchouli/"log_fatal"> normally does.
-
-=item Log::Log4perl
-
-The string C<Log::Log4perl> will use a global L<Log::Log4perl> logger, with the
-L<Mojolicious> application class name as the category (which is
-C<Mojolicious::Lite> for lite applications).
-
-=item Mojo::Log
-
-Another L<Mojo::Log> object can be passed to be used for logging.
-
-=back
+Logging framework or object to pass log messages to, of a type recognized by
+L<Mojo::Log::Role::AttachLogger/"attach_logger">. Defaults to C<Log::Any>.
 
 =head1 BUGS
 

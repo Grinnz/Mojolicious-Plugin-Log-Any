@@ -79,7 +79,7 @@ EOW
       "configure_requires" => {
         "Module::Build::Tiny" => "0.034"
       },
-      "dist_abstract" => "Use other loggers for Mojolicious applications",
+      "dist_abstract" => "Use other loggers in a Mojolicious application",
       "dist_author" => [
         "Dan Book <dbook\@cpan.org>"
       ],
@@ -95,6 +95,7 @@ EOW
         "Carp" => 0,
         "Module::Runtime" => 0,
         "Mojolicious" => "6.0",
+        "Role::Tiny" => "2.000001",
         "Scalar::Util" => 0,
         "perl" => "5.010001"
       },

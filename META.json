@@ -1,5 +1,5 @@
 {
-   "abstract" : "Use other loggers for Mojolicious applications",
+   "abstract" : "Use other loggers in a Mojolicious application",
    "author" : [
       "Dan Book <dbook@cpan.org>"
    ],
@@ -49,6 +49,7 @@
             "Carp" : "0",
             "Module::Runtime" : "0",
             "Mojolicious" : "6.0",
+            "Role::Tiny" : "2.000001",
             "Scalar::Util" : "0",
             "perl" : "5.010001"
          }
@@ -66,6 +67,10 @@
       }
    },
    "provides" : {
+      "Mojo::Log::Role::AttachLogger" : {
+         "file" : "lib/Mojo/Log/Role/AttachLogger.pm",
+         "version" : "0.001"
+      },
       "Mojolicious::Plugin::Log::Any" : {
          "file" : "lib/Mojolicious/Plugin/Log/Any.pm",
          "version" : "0.001"
