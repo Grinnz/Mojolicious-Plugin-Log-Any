@@ -95,7 +95,7 @@ Mojolicious::Plugin::Log::Any - Use other loggers for Mojolicious applications
     
     # Log::Dispatchouli
     use Log::Dispatchouli;
-    my $log = Log::Dispatchouli->new({ident => 'MyApp', facility => 'daemon'});
+    my $log = Log::Dispatchouli->new({ident => 'MyApp', facility => 'daemon', to_file => 1});
     $self->plugin('Log::Any' => {logger => $log});
   }
   
