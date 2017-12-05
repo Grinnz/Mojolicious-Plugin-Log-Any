@@ -54,6 +54,14 @@ sub register {
       my $formatted = "[$level] " . join "\n", @msg;
       $logger->$level($formatted);
     };
+  } elsif ($logger eq 'Log::Log4perl') {
+    require Log::Log4perl;
+    $logger = Log::Log4perl->get_logger(ref($app));
+    $do_log = sub {
+      my ($log, $level, @msg) = @_;
+      my $formatted = "[$level] " . join "\n", @msg;
+      $logger->$level($formatted);
+    };
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     require_module "$logger";
     "$logger"->import(':log');
@@ -107,11 +115,16 @@ Mojolicious::Plugin::Log::Any - Use other loggers for Mojolicious applications
     use Log::Dispatchouli;
     my $log = Log::Dispatchouli->new({ident => 'MyApp', facility => 'daemon', to_file => 1});
     $self->plugin('Log::Any' => {logger => $log});
+    
+    # Log::Log4perl
+    use Log::Log4perl;
+    Log::Log4perl->init($self->home->child('log.conf'));
+    $self->plugin('Log::Any' => {logger => 'Log::Log4perl'});
   }
   
   # or in a Mojolicious::Lite app
   use Mojolicious::Lite;
-  use Log::Any::Adapter {category => 'Mojolicious::Lite'}, File => '/path/to/file.log', log_level => 'info';
+  use Log::Any::Adapter {category => 'Mojolicious::Lite'}, File => app->home->child('myapp.log'), log_level => 'info';
   plugin 'Log::Any';
 
 =head1 DESCRIPTION
@@ -167,6 +180,12 @@ A L<Log::Dispatchouli> object can be passed to be used for logging. The
 C<fatal> log level will log messages even if the object is C<muted>, but an
 exception will not be thrown as L<Log::Dispatchouli/"log_fatal"> normally does.
 
+=item Log::Log4perl
+
+The string C<Log::Log4perl> will use a global L<Log::Log4perl> logger, with the
+L<Mojolicious> application class name as the category (which is
+C<Mojolicious::Lite> for lite applications).
+
 =item Mojo::Log
 
 Another L<Mojo::Log> object can be passed to be used for logging.
@@ -192,4 +211,4 @@ This is free software, licensed under:
 =head1 SEE ALSO
 
 L<Mojo::Log>, L<Log::Any>, L<Log::Contextual>, L<Log::Dispatch>,
-L<Log::Dispatchouli>
+L<Log::Dispatchouli>, L<Log::Log4perl>

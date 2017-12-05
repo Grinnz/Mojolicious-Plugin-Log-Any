@@ -10,3 +10,4 @@ author_requires 'Log::Any';
 author_requires 'Log::Contextual';
 author_requires 'Log::Dispatch';
 author_requires 'Log::Dispatchouli';
+author_requires 'Log::Log4perl';
