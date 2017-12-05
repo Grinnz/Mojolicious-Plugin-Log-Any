@@ -94,7 +94,7 @@ EOW
       "requires" => {
         "Carp" => 0,
         "Module::Runtime" => 0,
-        "Mojolicious" => "6.0",
+        "Mojolicious" => "7.40",
         "Role::Tiny" => "2.000001",
         "Scalar::Util" => 0,
         "perl" => "5.010001"

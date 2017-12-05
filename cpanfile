@@ -1,5 +1,5 @@
 requires 'perl' => '5.010001';
-requires 'Mojolicious' => '6.0';
+requires 'Mojolicious' => '7.40';
 requires 'Carp';
 requires 'Module::Runtime';
 requires 'Role::Tiny' => '2.000001';

@@ -2,62 +2,39 @@ use strict;
 use warnings;
 use Test::Needs 'Log::Dispatchouli';
 
-my @levels = qw(debug info warn error fatal);
-
-my ($full_log, $lite_log) = (Log::Dispatchouli->new_tester({debug => 1}), Log::Dispatchouli->new_tester);
-$lite_log->set_muted(1);
-
-{package My::Test::App;
-  use Mojo::Base 'Mojolicious';
-  sub startup {
-    my $self = shift;
-    $self->plugin('Log::Any' => {logger => $full_log});
-    foreach my $level (@levels) {
-      $self->routes->get("/$level" => sub {
-        my $c = shift;
-        $c->app->log->$level('test', 'message');
-        $c->render(text => '');
-      });
-    }
-  };
-}
-
-use Mojolicious::Lite;
-plugin 'Log::Any' => {logger => $lite_log};
-foreach my $level (@levels) {
-  get "/$level" => sub {
-    my $c = shift;
-    $c->app->log->$level('test', 'message');
-    $c->render(text => '');
-  };
-}
-
+use Mojo::Log;
 use Mojo::Util 'dumper';
-use Test::Mojo;
 use Test::More;
 
-my $t = Test::Mojo->new;
+my @levels = qw(debug info warn error fatal);
+
+my $debug_log = Log::Dispatchouli->new_tester({debug => 1});
+my $log = Mojo::Log->with_roles('+AttachLogger')->new->attach_logger($debug_log);
+
 foreach my $level (@levels) {
-  $lite_log->clear_events;
+  $debug_log->clear_events;
   
-  $t->get_ok("/$level");
+  $log->$level('test', 'message');
   
-  if ($level eq 'fatal') {
-    ok +(grep { $_->{message} =~ m/\[\Q$level\E\] test\nmessage$/m } @{$lite_log->events}), "$level log message"
-      or diag dumper $lite_log->events;
-  } else {
-    is_deeply $lite_log->events, [], 'no log message' or diag dumper $lite_log->events;
-  }
+  ok +(grep { $_->{message} =~ m/\[\Q$level\E\] test\nmessage$/m } @{$debug_log->events}), "$level log message"
+    or diag dumper $debug_log->events;
 }
 
-$t = Test::Mojo->new('My::Test::App');
+my $muted_log = Log::Dispatchouli->new_tester;
+$muted_log->set_muted(1);
+$log->attach_logger($muted_log);
+
 foreach my $level (@levels) {
-  $full_log->clear_events;
+  $muted_log->clear_events;
   
-  $t->get_ok("/$level");
+  $log->$level('test', 'message');
   
-  ok +(grep { $_->{message} =~ m/\[\Q$level\E\] test\nmessage$/m } @{$full_log->events}), "$level log message"
-    or diag dumper $full_log->events;
+  if ($level eq 'fatal') {
+    ok +(grep { $_->{message} =~ m/\[\Q$level\E\] test\nmessage$/m } @{$muted_log->events}), "$level log message"
+      or diag dumper $muted_log->events;
+  } else {
+    is_deeply $muted_log->events, [], 'no log message' or diag dumper $muted_log->events;
+  }
 }
 
 done_testing;

@@ -2,71 +2,48 @@ use strict;
 use warnings;
 use Test::Needs 'Log::Log4perl';
 
-Log::Log4perl->init({
-  'log4perl.logger.My::Test::App' => 'DEBUG, full_log',
-  'log4perl.logger.Mojolicious::Lite' => 'INFO, lite_log',
-  'log4perl.appender.full_log' => 'Log::Log4perl::Appender::TestBuffer',
-  'log4perl.appender.full_log.name' => 'full_log',
-  'log4perl.appender.full_log.layout' => 'Log::Log4perl::Layout::SimpleLayout',
-  'log4perl.appender.lite_log' => 'Log::Log4perl::Appender::TestBuffer',
-  'log4perl.appender.lite_log.name' => 'lite_log',
-  'log4perl.appender.lite_log.layout' => 'Log::Log4perl::Layout::SimpleLayout',
-});
+use Mojo::Log;
+use Test::More;
 
 my @levels = qw(debug info warn error fatal);
 
-{package My::Test::App;
-  use Mojo::Base 'Mojolicious';
-  sub startup {
-    my $self = shift;
-    $self->plugin('Log::Any' => {logger => 'Log::Log4perl'});
-    foreach my $level (@levels) {
-      $self->routes->get("/$level" => sub {
-        my $c = shift;
-        $c->app->log->$level('test', 'message');
-        $c->render(text => '');
-      });
-    }
-  };
-}
+Log::Log4perl->init({
+  'log4perl.logger.Test::Log::Debug' => 'DEBUG, debug_log',
+  'log4perl.logger.Test::Log::Info' => 'INFO, info_log',
+  'log4perl.appender.debug_log' => 'Log::Log4perl::Appender::TestBuffer',
+  'log4perl.appender.debug_log.name' => 'debug_log',
+  'log4perl.appender.debug_log.layout' => 'Log::Log4perl::Layout::SimpleLayout',
+  'log4perl.appender.info_log' => 'Log::Log4perl::Appender::TestBuffer',
+  'log4perl.appender.info_log.name' => 'info_log',
+  'log4perl.appender.info_log.layout' => 'Log::Log4perl::Layout::SimpleLayout',
+});
 
-use Mojolicious::Lite;
-plugin 'Log::Any' => {logger => 'Log::Log4perl'};
+my $log = Mojo::Log->with_roles('+AttachLogger')->new->attach_logger('Log::Log4perl', 'Test::Log::Debug');
+
+my $debug_log = Log::Log4perl::Appender::TestBuffer->by_name('debug_log');
 foreach my $level (@levels) {
-  get "/$level" => sub {
-    my $c = shift;
-    $c->app->log->$level('test', 'message');
-    $c->render(text => '');
-  };
-}
-
-use Test::Mojo;
-use Test::More;
-
-my $t = Test::Mojo->new;
-my $lite_log = Log::Log4perl::Appender::TestBuffer->by_name('lite_log');
-foreach my $level (@levels) {
-  $lite_log->clear;
+  $debug_log->clear;
   
-  $t->get_ok("/$level");
+  $log->$level('test', 'message');
+  
+  like $debug_log->buffer, qr/\[\Q$level\E\] test\nmessage$/m, "$level log message"
+    or diag $debug_log->buffer;
+}
+
+$log->attach_logger('Log::Log4perl', 'Test::Log::Info');
+
+my $info_log = Log::Log4perl::Appender::TestBuffer->by_name('info_log');
+foreach my $level (@levels) {
+  $info_log->clear;
+  
+  $log->$level('test', 'message');
   
   if ($level eq 'debug') {
-    is $lite_log->buffer, '', 'no log message' or diag $lite_log->buffer;
+    is $info_log->buffer, '', 'no log message' or diag $info_log->buffer;
   } else {
-    like $lite_log->buffer, qr/\[\Q$level\E\] test\nmessage$/m, "$level log message"
-      or diag $lite_log->buffer;
+    like $info_log->buffer, qr/\[\Q$level\E\] test\nmessage$/m, "$level log message"
+      or diag $info_log->buffer;
   }
-}
-
-$t = Test::Mojo->new('My::Test::App');
-my $full_log = Log::Log4perl::Appender::TestBuffer->by_name('full_log');
-foreach my $level (@levels) {
-  $full_log->clear;
-  
-  $t->get_ok("/$level");
-  
-  like $full_log->buffer, qr/\[\Q$level\E\] test\nmessage$/m, "$level log message"
-    or diag $full_log->buffer;
 }
 
 done_testing;

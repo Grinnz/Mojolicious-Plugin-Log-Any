@@ -2,63 +2,40 @@ use strict;
 use warnings;
 use Test::Needs 'Log::Dispatch';
 
-my @levels = qw(debug info warn error fatal);
-
-my (@full_log, @lite_log);
-
-{package My::Test::App;
-  use Mojo::Base 'Mojolicious';
-  my $log = Log::Dispatch->new(outputs => [['Code', code => sub { my %p = @_; push @full_log, $p{message} }, min_level => 'debug']]);
-  sub startup {
-    my $self = shift;
-    $self->plugin('Log::Any' => {logger => $log});
-    foreach my $level (@levels) {
-      $self->routes->get("/$level" => sub {
-        my $c = shift;
-        $c->app->log->$level('test', 'message');
-        $c->render(text => '');
-      });
-    }
-  };
-}
-
-use Mojolicious::Lite;
-my $log = Log::Dispatch->new(outputs => [['Code', code => sub { my %p = @_; push @lite_log, $p{message} }, min_level => 'info']]);
-plugin 'Log::Any' => {logger => $log};
-foreach my $level (@levels) {
-  get "/$level" => sub {
-    my $c = shift;
-    $c->app->log->$level('test', 'message');
-    $c->render(text => '');
-  };
-}
-
+use Mojo::Log;
 use Mojo::Util 'dumper';
 use Test::Mojo;
 use Test::More;
 
-my $t = Test::Mojo->new;
+my @levels = qw(debug info warn error fatal);
+
+my @log;
+my $debug_log = Log::Dispatch->new(outputs => [['Code', code => sub { my %p = @_; push @log, $p{message} }, min_level => 'debug']]);
+my $log = Mojo::Log->with_roles('+AttachLogger')->new->attach_logger($debug_log);
+
 foreach my $level (@levels) {
-  @lite_log = ();
+  @log = ();
   
-  $t->get_ok("/$level");
+  $log->$level('test', 'message');
   
-  if ($level eq 'debug') {
-    is_deeply \@lite_log, [], 'no log message' or diag dumper \@lite_log;
-  } else {
-    ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @lite_log), "$level log message"
-      or diag dumper \@lite_log;
-  }
+  ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @log), "$level log message"
+    or diag dumper \@log;
 }
 
-$t = Test::Mojo->new('My::Test::App');
+my $info_log = Log::Dispatch->new(outputs => [['Code', code => sub { my %p = @_; push @log, $p{message} }, min_level => 'info']]);
+$log->attach_logger($info_log);
+
 foreach my $level (@levels) {
-  @full_log = ();
+  @log = ();
   
-  $t->get_ok("/$level");
+  $log->$level('test', 'message');
   
-  ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @full_log), "$level log message"
-    or diag dumper \@full_log;
+  if ($level eq 'debug') {
+    is_deeply \@log, [], 'no log message' or diag dumper \@log;
+  } else {
+    ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @log), "$level log message"
+      or diag dumper \@log;
+  }
 }
 
 done_testing;
