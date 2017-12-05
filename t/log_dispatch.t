@@ -11,7 +11,8 @@ my @levels = qw(debug info warn error fatal);
 
 my @log;
 my $debug_log = Log::Dispatch->new(outputs => [['Code', code => sub { my %p = @_; push @log, $p{message} }, min_level => 'debug']]);
-my $log = Mojo::Log->with_roles('+AttachLogger')->new->attach_logger($debug_log);
+my $log = Mojo::Log->with_roles('+AttachLogger')->new
+  ->unsubscribe('message')->attach_logger($debug_log);
 
 foreach my $level (@levels) {
   @log = ();
@@ -23,7 +24,7 @@ foreach my $level (@levels) {
 }
 
 my $info_log = Log::Dispatch->new(outputs => [['Code', code => sub { my %p = @_; push @log, $p{message} }, min_level => 'info']]);
-$log->attach_logger($info_log);
+$log->unsubscribe('message')->attach_logger($info_log);
 
 foreach my $level (@levels) {
   @log = ();

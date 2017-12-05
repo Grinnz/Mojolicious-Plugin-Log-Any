@@ -79,7 +79,7 @@ sub attach_logger {
     Carp::croak "Unsupported logger class $logger";
   }
   
-  $self->unsubscribe('message')->on(message => $do_log);
+  $self->on(message => $do_log);
   
   return $self;
 }
@@ -93,7 +93,7 @@ Mojo::Log::Role::AttachLogger - Use other loggers for Mojo::Log
 =head1 SYNOPSIS
 
   use Mojo::Log;
-  my $log = Mojo::Log->with_roles('+AttachLogger')->new;
+  my $log = Mojo::Log->with_roles('+AttachLogger')->new->unsubscribe('message');
   
   # Log::Any
   use Log::Any::Adapter {category => 'Mojo::Log'}, 'Syslog';
@@ -127,21 +127,20 @@ Mojo::Log::Role::AttachLogger - Use other loggers for Mojo::Log
   
 =head1 DESCRIPTION
 
-L<Mojo::Log::Role::AttachLogger> is a <Role::Tiny> role for L<Mojo::Log> that
+L<Mojo::Log::Role::AttachLogger> is a L<Role::Tiny> role for L<Mojo::Log> that
 redirects log messages to an external logging framework. L</"attach_logger">
 currently recognizes the strings C<Log::Any>, C<Log::Contextual>,
 C<Log::Log4perl>, and objects of the classes C<Log::Any::Proxy>,
 C<Log::Dispatch>, C<Log::Dispatchouli>, and C<Mojo::Log>.
 
-The default behavior of the L<Mojo::Log> object to filter messages by level,
-keep history, prepend a timestamp, and write log messages to a file or STDERR
-will be suppressed. It is expected that the logging framework output handler
-will be configured to handle these details as necessary. The log level,
-however, will be prepended to the message in brackets before passing it on
-(except when passing to another L<Mojo::Log> object which normally does this).
+The default L<Mojo::Log/"message"> event handler is not suppressed by
+L</"attach_logger">, so if you want to suppress the default behavior, you
+should unsubscribe from the message event first. Unsubscribing from the message
+event will also remove any loggers attached by L</"attach_logger">.
 
-L<Mojolicious::Plugin::Log::Any> can be used to apply this role and attach a
-logger to the L<Mojolicious> application logger.
+L<Mojolicious::Plugin::Log::Any> can be used to attach a logger to the
+L<Mojolicious> application logger and suppress the default message event
+handler.
 
 =head1 METHODS
 
@@ -151,7 +150,7 @@ L<Mojo::Log::Role::AttachLogger> composes the following methods.
 
   $log = $log->attach_logger($logger, $category);
 
-Suppresses the default logging behavior and passes log messages to the given
+Subscribes to L<Mojo::Log/"message"> and passes log messages to the given
 logging framework or object, with an optional category for L<Log::Any> and
 L<Log::Log4perl> (defaults to C<Mojo::Log>). The following loggers are
 recognized:

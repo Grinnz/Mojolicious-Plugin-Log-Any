@@ -18,7 +18,8 @@ Log::Log4perl->init({
   'log4perl.appender.info_log.layout' => 'Log::Log4perl::Layout::SimpleLayout',
 });
 
-my $log = Mojo::Log->with_roles('+AttachLogger')->new->attach_logger('Log::Log4perl', 'Test::Log::Debug');
+my $log = Mojo::Log->with_roles('+AttachLogger')->new
+  ->unsubscribe('message')->attach_logger('Log::Log4perl', 'Test::Log::Debug');
 
 my $debug_log = Log::Log4perl::Appender::TestBuffer->by_name('debug_log');
 foreach my $level (@levels) {
@@ -30,7 +31,7 @@ foreach my $level (@levels) {
     or diag $debug_log->buffer;
 }
 
-$log->attach_logger('Log::Log4perl', 'Test::Log::Info');
+$log->unsubscribe('message')->attach_logger('Log::Log4perl', 'Test::Log::Info');
 
 my $info_log = Log::Log4perl::Appender::TestBuffer->by_name('info_log');
 foreach my $level (@levels) {

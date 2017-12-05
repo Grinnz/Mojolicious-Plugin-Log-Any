@@ -10,7 +10,7 @@ sub register {
   my $logger = $conf->{logger} // 'Log::Any';
   
   $app->log->with_roles('Mojo::Log::Role::AttachLogger')
-    ->attach_logger($logger, ref($app));
+    ->unsubscribe('message')->attach_logger($logger, ref($app));
 }
 
 1;
@@ -71,6 +71,13 @@ using L<Mojo::Log::Role::AttachLogger/"attach_logger">. By default, L<Log::Any>
 is used, but a different framework or object may be specified. For L<Log::Any>
 or L<Log::Log4perl>, log messages are dispatched with a category of the
 application class name, which is C<Mojolicious::Lite> for lite applications.
+
+The default behavior of the L<Mojo::Log> object to filter messages by level,
+keep history, prepend a timestamp, and write log messages to a file or STDERR
+will be suppressed. It is expected that the logging framework output handler
+will be configured to handle these details as necessary. The log level,
+however, will be prepended to the message in brackets before passing it on
+(except when passing to another L<Mojo::Log> object which normally does this).
 
 =head1 METHODS
 

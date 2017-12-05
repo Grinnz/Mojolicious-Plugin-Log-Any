@@ -8,7 +8,8 @@ use Test::More;
 
 my @levels = qw(debug info warn error fatal);
 
-my $log = Mojo::Log->with_roles('+AttachLogger')->new->attach_logger('Log::Any', 'Test::Category');
+my $log = Mojo::Log->with_roles('+AttachLogger')->new
+  ->unsubscribe('message')->attach_logger('Log::Any', 'Test::Category');
 
 my $log_any = Log::Any->get_logger(category => 'Test::Category');
 foreach my $level (@levels) {

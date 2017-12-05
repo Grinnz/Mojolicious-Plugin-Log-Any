@@ -12,7 +12,8 @@ use Log::Contextual -logger => Log::Contextual::SimpleLogger->new({coderef => su
 
 my @levels = qw(debug info warn error fatal);
 
-my $log = Mojo::Log->with_roles('+AttachLogger')->new->attach_logger('Log::Contextual');
+my $log = Mojo::Log->with_roles('+AttachLogger')->new
+  ->unsubscribe('message')->attach_logger('Log::Contextual');
 foreach my $level (@levels) {
   @log = ();
   
