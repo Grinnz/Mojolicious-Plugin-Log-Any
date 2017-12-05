@@ -9,7 +9,7 @@ my @levels = qw(debug info warn error fatal);
 
 my @full_log;
 my $full_logger = Mojo::Log->new;
-$full_logger->unsubscribe('message')->on(message => sub { push @full_log, "[$_[1]] " . join "\n", @_[2..$#_] });
+$full_logger->unsubscribe('message')->on(message => sub { push @full_log, [$_[1], $_[2]] });
 
 {package My::Test::App;
   use Mojo::Base 'Mojolicious';
@@ -19,7 +19,7 @@ $full_logger->unsubscribe('message')->on(message => sub { push @full_log, "[$_[1
     foreach my $level (@levels) {
       $self->routes->get("/$level" => sub {
         my $c = shift;
-        $c->app->log->$level('test', 'message');
+        $c->app->log->$level('full');
         $c->render(text => '');
       });
     }
@@ -28,14 +28,14 @@ $full_logger->unsubscribe('message')->on(message => sub { push @full_log, "[$_[1
 
 my @lite_log;
 my $lite_logger = Mojo::Log->new;
-$lite_logger->unsubscribe('message')->on(message => sub { push @lite_log, "[$_[1]] " . join "\n", @_[2..$#_] });
+$lite_logger->unsubscribe('message')->on(message => sub { push @lite_log, [$_[1], $_[2]] });
 
 use Mojolicious::Lite;
 plugin 'Log::Any' => {logger => $lite_logger};
 foreach my $level (@levels) {
   get "/$level" => sub {
     my $c = shift;
-    $c->app->log->$level('test', 'message');
+    $c->app->log->$level('lite');
     $c->render(text => '');
   };
 }
@@ -46,7 +46,7 @@ foreach my $level (@levels) {
   
   $t->get_ok("/$level");
   
-  ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @lite_log), "$level log message"
+  ok +(grep { $_->[0] eq $level and $_->[1] eq 'lite' } @lite_log), "$level log message"
     or diag dumper \@lite_log;
 }
 
@@ -56,7 +56,7 @@ foreach my $level (@levels) {
   
   $t->get_ok("/$level");
   
-  ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @full_log), "$level log message"
+  ok +(grep { $_->[0] eq $level and $_->[1] eq 'full' } @full_log), "$level log message"
     or diag dumper \@full_log;
 }
 
