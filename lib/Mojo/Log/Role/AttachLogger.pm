@@ -152,8 +152,9 @@ L<Mojo::Log::Role::AttachLogger> composes the following methods.
 
 Subscribes to L<Mojo::Log/"message"> and passes log messages to the given
 logging framework or object, with an optional category for L<Log::Any> and
-L<Log::Log4perl> (defaults to C<Mojo::Log>). The following loggers are
-recognized:
+L<Log::Log4perl> (defaults to C<Mojo::Log>). The log level will be prepended to
+the message in square brackets (except when passing to another L<Mojo::Log>
+object). The following loggers are recognized:
 
 =over
 

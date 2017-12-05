@@ -60,9 +60,7 @@ application class name, which is C<Mojolicious::Lite> for lite applications.
 The default behavior of the L<Mojo::Log> object to filter messages by level,
 keep history, prepend a timestamp, and write log messages to a file or STDERR
 will be suppressed. It is expected that the logging framework output handler
-will be configured to handle these details as necessary. The log level,
-however, will be prepended to the message in brackets before passing it on
-(except when passing to another L<Mojo::Log> object which normally does this).
+will be configured to handle these details as necessary.
 
 =head1 METHODS
 
