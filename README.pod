@@ -57,6 +57,18 @@ is used, but a different framework or object may be specified. For L<Log::Any>
 or L<Log::Log4perl>, log messages are dispatched with a category of the
 application class name, which is C<Mojolicious::Lite> for lite applications.
 
+=head1 METHODS
+
+L<Mojolicious::Plugin::Log::Any> inherits all methods from
+L<Mojolicious::Plugin> and implements the following new ones.
+
+=head2 register
+
+  $plugin->register(Mojolicious->new);
+  $plugin->register(Mojolicious->new, {logger => $logger});
+
+Register logger in L<Mojolicious> application.
+
 =head1 OPTIONS
 
 =head2 logger
