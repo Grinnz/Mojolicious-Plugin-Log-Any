@@ -106,7 +106,9 @@ By default, L<Log::Any> is used, but a different framework or object may be
 specified. The default behavior of the L<Mojo::Log> object to filter messages
 by level, keep history, and write log messages to a file or STDERR will be
 suppressed, as it is expected that the user will configure the selected logging
-framework to handle such details.
+framework to handle such details. Note that depending on the output format,
+some loggers may prepend a timestamp to each log entry and some may not, so
+configure the logging framework as needed.
 
 =head1 OPTIONS
 
@@ -132,11 +134,10 @@ in the standard manner, using the object's existing category.
 
 =item Log::Contextual
 
-The string C<Log::Contextual> (or the package name of a subclass of
-L<Log::Contextual>) will use the global L<Log::Contextual> logger. Package
-loggers are not supported. Note that L<Log::Contextual/"with_logger"> may be
-difficult to use with L<Mojolicious> logging due to the asynchronous nature of
-the dispatch cycle.
+The string C<Log::Contextual> will use the global L<Log::Contextual> logger.
+Package loggers are not supported. Note that L<Log::Contextual/"with_logger">
+may be difficult to use with L<Mojolicious> logging due to the asynchronous
+nature of the dispatch cycle.
 
 =item Log::Dispatch
 
