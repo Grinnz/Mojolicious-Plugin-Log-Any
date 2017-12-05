@@ -70,6 +70,7 @@ sub attach_logger {
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     Module::Runtime::require_module("$logger");
     "$logger"->import::into(ref($self), ':log');
+    Scalar::Util::weaken($self);
     $do_log = sub {
       my (undef, $level, @msg) = @_;
       my $formatted = "[$level] " . join "\n", @msg;
