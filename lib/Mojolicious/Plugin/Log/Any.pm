@@ -82,16 +82,16 @@ L<Mojolicious::Plugin> and implements the following new ones.
   $plugin->register(Mojolicious->new);
   $plugin->register(Mojolicious->new, {logger => $logger});
 
-Register logger in L<Mojolicious> application.
+Register logger in L<Mojolicious> application. Takes the following options:
 
-=head1 OPTIONS
+=over
 
-=head2 logger
-
-  plugin 'Log::Any', {logger => $logger};
+=item logger
 
 Logging framework or object to pass log messages to, of a type recognized by
 L<Mojo::Log::Role::AttachLogger/"attach_logger">. Defaults to C<Log::Any>.
+
+=back
 
 =head1 BUGS
 
