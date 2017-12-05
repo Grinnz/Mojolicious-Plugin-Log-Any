@@ -2,6 +2,7 @@ package Mojo::Log::Role::AttachLogger;
 
 use Role::Tiny;
 use Carp 'croak';
+use Import::Into;
 use Module::Runtime 'require_module';
 use Scalar::Util 'blessed';
 
@@ -67,11 +68,11 @@ sub attach_logger {
     };
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     require_module "$logger";
-    "$logger"->import(':log');
+    "$logger"->import::into(ref($self), ':log');
     $do_log = sub {
       my (undef, $level, @msg) = @_;
       my $formatted = "[$level] " . join "\n", @msg;
-      __PACKAGE__->can("slog_$level")->($formatted);
+      $self->can("slog_$level")->($formatted);
     };
   } else {
     croak "Unsupported logger class $logger";

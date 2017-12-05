@@ -93,6 +93,7 @@ EOW
       "recursive_test_files" => 1,
       "requires" => {
         "Carp" => 0,
+        "Import::Into" => 0,
         "Module::Runtime" => 0,
         "Mojolicious" => "7.40",
         "Role::Tiny" => "2.000001",

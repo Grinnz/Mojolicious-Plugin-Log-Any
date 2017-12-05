@@ -1,6 +1,7 @@
 requires 'perl' => '5.010001';
 requires 'Mojolicious' => '7.40';
 requires 'Carp';
+requires 'Import::Into';
 requires 'Module::Runtime';
 requires 'Role::Tiny' => '2.000001';
 requires 'Scalar::Util';
