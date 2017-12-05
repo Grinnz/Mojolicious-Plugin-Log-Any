@@ -1,10 +1,10 @@
 package Mojo::Log::Role::AttachLogger;
 
 use Role::Tiny;
-use Carp 'croak';
-use Import::Into;
-use Module::Runtime 'require_module';
-use Scalar::Util 'blessed';
+use Carp ();
+use Import::Into ();
+use Module::Runtime ();
+use Scalar::Util ();
 
 our $VERSION = '0.001';
 
@@ -14,10 +14,11 @@ requires qw(on unsubscribe);
 
 sub attach_logger {
   my ($self, $logger, $category) = @_;
+  Carp::croak 'No logger passed' unless defined $logger;
   $category //= 'Mojo::Log';
   
   my $do_log;
-  if (blessed $logger) {
+  if (Scalar::Util::blessed($logger)) {
     if ($logger->isa('Log::Any::Proxy')) {
       $do_log = sub {
         my (undef, $level, @msg) = @_;
@@ -48,7 +49,7 @@ sub attach_logger {
         $logger->$level(@msg);
       };
     } else {
-      croak "Unsupported logger object class " . ref($logger);
+      Carp::croak "Unsupported logger object class " . ref($logger);
     }
   } elsif ($logger eq 'Log::Any') {
     require Log::Any;
@@ -67,7 +68,7 @@ sub attach_logger {
       $logger->$level($formatted);
     };
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
-    require_module "$logger";
+    Module::Runtime::require_module("$logger");
     "$logger"->import::into(ref($self), ':log');
     $do_log = sub {
       my (undef, $level, @msg) = @_;
@@ -75,7 +76,7 @@ sub attach_logger {
       $self->can("slog_$level")->($formatted);
     };
   } else {
-    croak "Unsupported logger class $logger";
+    Carp::croak "Unsupported logger class $logger";
   }
   
   $self->unsubscribe('message')->on(message => $do_log);
@@ -94,9 +95,9 @@ Mojo::Log::Role::AttachLogger - Use other loggers for Mojo::Log
   use Mojo::Log;
   my $log = Mojo::Log->with_roles('+AttachLogger')->new;
   
-  # Log::Any (default)
+  # Log::Any
   use Log::Any::Adapter {category => 'Mojo::Log'}, 'Syslog';
-  $log->attach_logger;
+  $log->attach_logger('Log::Any', 'Some::Category');
   
   # Log::Contextual
   use Log::Contextual::WarnLogger;
@@ -122,13 +123,15 @@ Mojo::Log::Role::AttachLogger - Use other loggers for Mojo::Log
   # Log::Log4perl
   use Log::Log4perl;
   Log::Log4perl->init('/path/to/log.conf');
-  $log->attach_logger('Log::Log4perl');
+  $log->attach_logger('Log::Log4perl', 'Some::Category');
   
 =head1 DESCRIPTION
 
 L<Mojo::Log::Role::AttachLogger> is a <Role::Tiny> role for L<Mojo::Log> that
-redirects log messages to an external logging framework. By default,
-L<Log::Any> is used, but a different framework or object may be specified.
+redirects log messages to an external logging framework. L</"attach_logger">
+currently recognizes the strings C<Log::Any>, C<Log::Contextual>,
+C<Log::Log4perl>, and objects of the classes C<Log::Any::Proxy>,
+C<Log::Dispatch>, C<Log::Dispatchouli>, and C<Mojo::Log>.
 
 The default behavior of the L<Mojo::Log> object to filter messages by level,
 keep history, prepend a timestamp, and write log messages to a file or STDERR
@@ -138,7 +141,7 @@ however, will be prepended to the message in brackets before passing it on
 (except when passing to another L<Mojo::Log> object which normally does this).
 
 L<Mojolicious::Plugin::Log::Any> can be used to apply this role and attach a
-logger to a L<Mojolicious> application logger.
+logger to the L<Mojolicious> application logger.
 
 =head1 METHODS
 
@@ -149,15 +152,16 @@ L<Mojo::Log::Role::AttachLogger> composes the following methods.
   $log = $log->attach_logger($logger, $category);
 
 Suppresses the default logging behavior and passes log messages to the given
-logging framework or object, with an optional category (defaults to
-C<Mojo::Log>). The following types are recognized:
+logging framework or object, with an optional category for L<Log::Any> and
+L<Log::Log4perl> (defaults to C<Mojo::Log>). The following loggers are
+recognized:
 
 =over
 
 =item Log::Any
 
-Default. The string C<Log::Any> will use a global L<Log::Any> logger with the
-specified category.
+The string C<Log::Any> will use a global L<Log::Any> logger with the specified
+category (defaults to C<Mojo::Log>).
 
 =item Log::Any::Proxy
 
@@ -185,7 +189,7 @@ exception will not be thrown as L<Log::Dispatchouli/"log_fatal"> normally does.
 =item Log::Log4perl
 
 The string C<Log::Log4perl> will use a global L<Log::Log4perl> logger with the
-specified category.
+specified category (defaults to C<Mojo::Log>).
 
 =item Mojo::Log
 

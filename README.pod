@@ -53,15 +53,9 @@ Mojolicious::Plugin::Log::Any - Use other loggers in a Mojolicious application
 L<Mojolicious::Plugin::Log::Any> is a L<Mojolicious> plugin that redirects the
 application logger to pass its log messages to an external logging framework
 using L<Mojo::Log::Role::AttachLogger/"attach_logger">. By default, L<Log::Any>
-is used, but a different framework or object may be specified. The category
-for L<Log::Any> or L<Log::Log4perl> is set to the application class name, which
-is C<Mojolicious::Lite> for lite applications.
-
-The default behavior of the L<Mojo::Log> object to filter messages by level,
-keep history, prepend a timestamp, and write log messages to a file or STDERR
-will be suppressed. It is expected that the logging framework output handler
-will be configured to handle these details as necessary. The log level,
-however, will be prepended to the message in brackets before passing it on.
+is used, but a different framework or object may be specified. For L<Log::Any>
+or L<Log::Log4perl>, log messages are dispatched with a category of the
+application class name, which is C<Mojolicious::Lite> for lite applications.
 
 =head1 OPTIONS
 
@@ -90,7 +84,6 @@ This is free software, licensed under:
 
 =head1 SEE ALSO
 
-L<Mojo::Log>, L<Log::Any>, L<Log::Contextual>, L<Log::Dispatch>,
-L<Log::Dispatchouli>, L<Log::Log4perl>
+L<Mojo::Log>, L<Mojo::Log::Role::AttachLogger>
 
 =cut
