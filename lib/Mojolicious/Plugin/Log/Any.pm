@@ -31,7 +31,8 @@ sub register {
         my $message = "[$level] " . join "\n", @msg;
         return $logger->log_debug($message) if $level eq 'debug';
         # hacky but we don't want to use log_fatal because it throws an
-        # exception, and we can't localize a call to set_muted
+        # exception, we want to allow real exceptions to propagate, and we
+        # can't localize a call to set_muted
         local $logger->{muted} = 0 if $level eq 'fatal' and $logger->get_muted;
         $logger->log($message);
       };
