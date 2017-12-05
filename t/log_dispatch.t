@@ -46,8 +46,7 @@ foreach my $level (@levels) {
   if ($level eq 'debug') {
     is_deeply \@lite_log, [], 'no log message';
   } else {
-    my $msg_level = $level eq 'fatal' ? 'critical' : $level;
-    ok +(grep { m/\[\Q$msg_level\E\] test\nmessage$/m } @lite_log), "$level log message"
+    ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @lite_log), "$level log message"
       or diag dumper \@lite_log;
   }
 }
@@ -58,8 +57,7 @@ foreach my $level (@levels) {
   
   $t->get_ok("/$level");
   
-  my $msg_level = $level eq 'fatal' ? 'critical' : $level;
-  ok +(grep { m/\[\Q$msg_level\E\] test\nmessage$/m } @full_log), "$level log message"
+  ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @full_log), "$level log message"
     or diag dumper \@full_log;
 }
 

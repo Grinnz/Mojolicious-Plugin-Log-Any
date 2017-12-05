@@ -17,24 +17,26 @@ sub register {
     if ($logger->isa('Log::Any::Proxy')) {
       $do_log = sub {
         my ($log, $level, @msg) = @_;
-        $logger->$level("[$level] " . join "\n", @msg);
+        my $formatted = "[$level] " . join "\n", @msg;
+        $logger->$level($formatted);
       };
     } elsif ($logger->isa('Log::Dispatch')) {
       $do_log = sub {
         my ($log, $level, @msg) = @_;
+        my $formatted = "[$level] " . join "\n", @msg;
         $level = 'critical' if $level eq 'fatal';
-        $logger->log(level => $level, message => "[$level] " . join "\n", @msg);
+        $logger->log(level => $level, message => $formatted);
       };
     } elsif ($logger->isa('Log::Dispatchouli')) {
       $do_log = sub {
         my ($log, $level, @msg) = @_;
-        my $message = "[$level] " . join "\n", @msg;
-        return $logger->log_debug($message) if $level eq 'debug';
+        my $formatted = "[$level] " . join "\n", @msg;
+        return $logger->log_debug($formatted) if $level eq 'debug';
         # hacky but we don't want to use log_fatal because it throws an
         # exception, we want to allow real exceptions to propagate, and we
         # can't localize a call to set_muted
         local $logger->{muted} = 0 if $level eq 'fatal' and $logger->get_muted;
-        $logger->log($message);
+        $logger->log($formatted);
       };
     } else {
       croak "Unsupported logger object class " . ref($logger);
@@ -44,14 +46,16 @@ sub register {
     $logger = Log::Any->get_logger(category => ref($app));
     $do_log = sub {
       my ($log, $level, @msg) = @_;
-      $logger->$level("[$level] " . join "\n", @msg);
+      my $formatted = "[$level] " . join "\n", @msg;
+      $logger->$level($formatted);
     };
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     require_module "$logger";
     "$logger"->import(':log');
     $do_log = sub {
       my ($log, $level, @msg) = @_;
-      $self->can("slog_$level")->("[$level] " . join "\n", @msg);
+      my $formatted = "[$level] " . join "\n", @msg;
+      $self->can("slog_$level")->($formatted);
     };
   } else {
     croak "Unsupported logger class $logger";
