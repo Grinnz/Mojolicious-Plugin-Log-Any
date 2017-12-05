@@ -49,11 +49,9 @@ L<Mojolicious::Plugin::Log::Any> is a L<Mojolicious> plugin that redirects the
 application logger to pass its log messages to an external logging framework.
 By default, L<Log::Any> is used, but a different framework or object may be
 specified. The default behavior of the L<Mojo::Log> object to filter messages
-by level, keep history, and write log messages to a file or STDERR will be
-suppressed, as it is expected that the user will configure the selected logging
-framework to handle such details. Note that depending on the output format,
-some loggers may prepend a timestamp to each log entry and some may not, so
-configure the logging framework as needed.
+by level, keep history, prepend a timestamp, and write log messages to a file
+or STDERR will be suppressed. It is expected that the logging framework output
+handler will be configured to handle these details as necessary.
 
 =head1 OPTIONS
 
