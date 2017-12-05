@@ -44,7 +44,7 @@ foreach my $level (@levels) {
   $t->get_ok("/$level");
   
   if ($level eq 'debug') {
-    is_deeply \@lite_log, [], 'no log message';
+    is_deeply \@lite_log, [], 'no log message' or diag dumper \@lite_log;
   } else {
     ok +(grep { m/\[\Q$level\E\] test\nmessage$/m } @lite_log), "$level log message"
       or diag dumper \@lite_log;

@@ -5,6 +5,7 @@ use Test::Needs 'Log::Dispatchouli';
 my @levels = qw(debug info warn error fatal);
 
 my ($full_log, $lite_log) = (Log::Dispatchouli->new_tester({debug => 1}), Log::Dispatchouli->new_tester);
+$lite_log->set_muted(1);
 
 {package My::Test::App;
   use Mojo::Base 'Mojolicious';
@@ -41,11 +42,11 @@ foreach my $level (@levels) {
   
   $t->get_ok("/$level");
   
-  if ($level eq 'debug') {
-    is_deeply $lite_log->events, [], 'no log message';
-  } else {
+  if ($level eq 'fatal') {
     ok +(grep { $_->{message} =~ m/\[\Q$level\E\] test\nmessage$/m } @{$lite_log->events}), "$level log message"
       or diag dumper $lite_log->events;
+  } else {
+    is_deeply $lite_log->events, [], 'no log message' or diag dumper $lite_log->events;
   }
 }
 

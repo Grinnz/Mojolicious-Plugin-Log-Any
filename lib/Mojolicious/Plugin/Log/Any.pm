@@ -27,7 +27,7 @@ sub register {
         $level = 'critical' if $level eq 'fatal';
         $logger->log(level => $level, message => $formatted);
       };
-    } elsif ($logger->isa('Log::Dispatchouli')) {
+    } elsif ($logger->isa('Log::Dispatchouli') or $logger->isa('Log::Dispatchouli::Proxy')) {
       $do_log = sub {
         my ($log, $level, @msg) = @_;
         my $formatted = "[$level] " . join "\n", @msg;
