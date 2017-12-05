@@ -84,7 +84,13 @@ Mojolicious::Plugin::Log::Any - Use other loggers for Mojolicious applications
     
     # Log::Dispatch
     use Log::Dispatch;
-    my $log = Log::Dispatch->new(outputs => ['Screen', min_level => 'warning']);
+    my $log = Log::Dispatch->new(outputs => ['File::Locked',
+      min_level => 'warning',
+      filename  => '/path/to/file.log',
+      mode      => 'append',
+      newline   => 1,
+      callbacks => sub { my %p = @_; sprintf '[%s] %s', scalar(localtime), $p{message} },
+    ]);
     $self->plugin('Log::Any' => {logger => $log});
     
     # Log::Dispatchouli
