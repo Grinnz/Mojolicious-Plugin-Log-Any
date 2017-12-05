@@ -38,19 +38,19 @@ Mojolicious::Plugin::Log::Any - Use other loggers in a Mojolicious application
     
     # Log::Dispatch
     use Log::Dispatch;
-    my $log = Log::Dispatch->new(outputs => ['File::Locked',
+    my $logger = Log::Dispatch->new(outputs => ['File::Locked',
       min_level => 'warning',
       filename  => '/path/to/file.log',
       mode      => 'append',
       newline   => 1,
       callbacks => sub { my %p = @_; '[' . localtime() . '] ' . $p{message} },
     ]);
-    $self->plugin('Log::Any' => {logger => $log});
+    $self->plugin('Log::Any' => {logger => $logger});
     
     # Log::Dispatchouli
     use Log::Dispatchouli;
-    my $log = Log::Dispatchouli->new({ident => 'MyApp', facility => 'daemon', to_file => 1});
-    $self->plugin('Log::Any' => {logger => $log});
+    my $logger = Log::Dispatchouli->new({ident => 'MyApp', facility => 'daemon', to_file => 1});
+    $self->plugin('Log::Any' => {logger => $logger});
     
     # Log::Log4perl
     use Log::Log4perl;
