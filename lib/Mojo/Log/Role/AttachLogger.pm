@@ -69,6 +69,7 @@ sub attach_logger {
     };
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     Module::Runtime::require_module("$logger");
+    Log::Contextual->VERSION('0.008000');
     "$logger"->import::into(ref($self), ':log');
     $do_log = sub {
       my ($self, $level, @msg) = @_;
