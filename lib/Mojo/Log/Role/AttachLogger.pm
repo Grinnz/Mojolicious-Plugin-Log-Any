@@ -70,12 +70,12 @@ sub attach_logger {
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     Module::Runtime::require_module("$logger");
     Log::Contextual->VERSION('0.008001');
-    my %methods = map { ($_ => "slog_$_") } qw(debug info warn error fatal);
-    "$logger"->import::into(ref($self), values %methods);
+    my %functions = map { ($_ => "slog_$_") } qw(debug info warn error fatal);
+    "$logger"->import::into(ref($self), values %functions);
     $do_log = sub {
       my ($self, $level, @msg) = @_;
       my $formatted = "[$level] " . join "\n", @msg;
-      $self->can($methods{$level})->($formatted);
+      $self->can($functions{$level})->($formatted);
     };
   } else {
     Carp::croak "Unsupported logger class $logger";
