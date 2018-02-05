@@ -10,7 +10,7 @@ our $VERSION = '0.003';
 
 our @CARP_NOT = 'Mojolicious::Plugin::Log::Any';
 
-requires qw(on unsubscribe);
+requires 'on';
 
 sub attach_logger {
   my ($self, $logger, $category) = @_;
@@ -69,12 +69,13 @@ sub attach_logger {
     };
   } elsif ($logger eq 'Log::Contextual' or "$logger"->isa('Log::Contextual')) {
     Module::Runtime::require_module("$logger");
-    Log::Contextual->VERSION('0.008000');
-    "$logger"->import::into(ref($self), ':log');
+    Log::Contextual->VERSION('0.008001');
+    my %methods = map { ($_ => "slog_$_") } qw(debug info warn error fatal);
+    "$logger"->import::into(ref($self), values %methods);
     $do_log = sub {
       my ($self, $level, @msg) = @_;
       my $formatted = "[$level] " . join "\n", @msg;
-      $self->can("slog_$level")->($formatted);
+      $self->can($methods{$level})->($formatted);
     };
   } else {
     Carp::croak "Unsupported logger class $logger";
