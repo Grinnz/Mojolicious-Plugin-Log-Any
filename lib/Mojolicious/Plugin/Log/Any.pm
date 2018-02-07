@@ -54,7 +54,7 @@ Mojolicious::Plugin::Log::Any - Use other loggers in a Mojolicious application
     
     # Log::Log4perl
     use Log::Log4perl;
-    Log::Log4perl->init($self->home->child('log.conf'));
+    Log::Log4perl->init($self->home->child('log.conf')->to_string);
     $self->plugin('Log::Any' => {logger => 'Log::Log4perl'});
   }
   
