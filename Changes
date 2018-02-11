@@ -1,4 +1,5 @@
 {{$NEXT}}
+  - Fix tests to not rely on shorthand for applying role
 
 0.004     2018-02-06 23:16:16 EST
   - Require Log::Any 1.00 for Log::Any testing
