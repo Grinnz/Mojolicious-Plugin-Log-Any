@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.005     2018-12-05 00:33:32 EST
   - Fix tests to not rely on shorthand for applying role
   - Mojolicious 8.06 changed Mojo::Log to not send the 'message' event when a
     log message would be filtered by the log level, so the plugin now explicitly
