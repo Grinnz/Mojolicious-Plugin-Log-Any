@@ -140,6 +140,10 @@ L</"attach_logger">, so if you want to suppress the default behavior, you
 should unsubscribe from the message event first. Unsubscribing from the message
 event will also remove any loggers attached by L</"attach_logger">.
 
+Since L<Mojolicious> 8.06, the L<Mojo::Log/"message"> event will not be sent
+for messages below the log level set in the L<Mojo::Log> object, so the
+attached logger will only receive log messages exceeding the configured level.
+
 L<Mojolicious::Plugin::Log::Any> can be used to attach a logger to the
 L<Mojolicious> application logger and suppress the default message event
 handler.

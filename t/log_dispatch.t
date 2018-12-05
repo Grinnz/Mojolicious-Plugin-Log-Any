@@ -4,7 +4,6 @@ use Test::Needs 'Log::Dispatch';
 
 use Mojo::Log;
 use Mojo::Util 'dumper';
-use Test::Mojo;
 use Test::More;
 
 my @levels = qw(debug info warn error fatal);
