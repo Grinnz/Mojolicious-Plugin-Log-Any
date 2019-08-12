@@ -84,6 +84,15 @@ Register logger in L<Mojolicious> application. Takes the following options:
 Logging framework or object to pass log messages to, of a type recognized by
 L<Mojo::Log::Role::AttachLogger/"attach_logger">. Defaults to C<Log::Any>.
 
+=item category
+
+Passed through to L<Mojo::Log::Role::AttachLogger/"attach_logger">. Defaults to
+the application name.
+
+=item prepend_level
+
+Passed through to L<Mojo::Log::Role::AttachLogger/"attach_logger">.
+
 =back
 
 =head1 BUGS

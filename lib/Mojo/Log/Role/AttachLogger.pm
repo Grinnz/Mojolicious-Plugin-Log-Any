@@ -6,7 +6,7 @@ use Import::Into ();
 use Module::Runtime ();
 use Scalar::Util ();
 
-our $VERSION = '0.006';
+our $VERSION = 'v1.0.0';
 
 our @CARP_NOT = 'Mojolicious::Plugin::Log::Any';
 
