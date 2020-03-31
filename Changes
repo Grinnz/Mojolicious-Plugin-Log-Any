@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+v1.0.1    2020-03-31 12:51:35 EDT
   - Avoid stringifying message when passed as a single reference with
     prepend_level false, such as when logging exception objects.
 
