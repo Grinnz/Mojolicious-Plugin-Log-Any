@@ -30,7 +30,7 @@ Mojolicious::Plugin::Log::Any - Use other loggers in a Mojolicious application
     my $self = shift;
     
     # Log::Any (default)
-    use Log::Any::Adapter {category => 'MyApp'}, 'Syslog';
+    use Log::Any::Adapter {category => 'MyApp', message_separator => ' '}, 'Syslog';
     $self->plugin('Log::Any');
     
     # Log::Contextual
@@ -107,6 +107,10 @@ Passed through to L<Mojo::Log::Role::AttachLogger/"attach_logger">. Defaults to
 the application name.
 
 =item prepend_level
+
+Passed through to L<Mojo::Log::Role::AttachLogger/"attach_logger">.
+
+=item message_separator
 
 Passed through to L<Mojo::Log::Role::AttachLogger/"attach_logger">.
 
