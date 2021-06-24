@@ -84,7 +84,7 @@ EOW
         "Dan Book <dbook\@cpan.org>"
       ],
       "dist_name" => "Mojolicious-Plugin-Log-Any",
-      "dist_version" => "v1.0.2",
+      "dist_version" => "v1.0.3",
       "license" => "artistic_2",
       "module_name" => "Mojolicious::Plugin::Log::Any",
       "recommends" => {
