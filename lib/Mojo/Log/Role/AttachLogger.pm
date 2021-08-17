@@ -159,6 +159,9 @@ Since L<Mojolicious> 8.06, the L<Mojo::Log/"message"> event will not be sent
 for messages below the log level set in the L<Mojo::Log> object, so the
 attached logger will only receive log messages exceeding the configured level.
 
+Since L<Mojolicious> 9.20, the C<trace> log level is supported though it may be
+mapped to C<debug> on some loggers.
+
 L<Mojolicious::Plugin::Log::Any> can be used to attach a logger to the
 L<Mojolicious> application logger and suppress the default message event
 handler.
