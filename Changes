@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+v2.0.0    2021-08-17 14:05:38 EDT
   - Support "trace" log level with Mojolicious 9.20 or newer.
     - An attached Log::Dispatch logger will log "trace" messages at the "debug" level.
     - An attached Log::Dispatchouli logger will log "trace" messages with "log_debug".
